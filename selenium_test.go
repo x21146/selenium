@@ -157,9 +157,9 @@ func runChromeTests(t *testing.T, c seleniumtest.Config) {
 	var s *selenium.Service
 	if c.SeleniumVersion.Major == 3 {
 		c.ServiceOptions = append(c.ServiceOptions, selenium.ChromeDriver(*chromeDriverPath))
-		s, err = selenium.NewSeleniumService(*selenium3Path, port, c.ServiceOptions...)
+		s, err = selenium.NewSeleniumService(*selenium3Path, port, c.ServiceOptions)
 	} else {
-		s, err = selenium.NewChromeDriverService(*chromeDriverPath, port, c.ServiceOptions...)
+		s, err = selenium.NewChromeDriverService(*chromeDriverPath, port, c.ServiceOptions)
 	}
 	if err != nil {
 		t.Fatalf("Error starting the server: %v", err)
@@ -235,7 +235,7 @@ func TestHTMLUnit(t *testing.T) {
 	if err != nil {
 		t.Fatalf("pickUnusedPort() returned error: %v", err)
 	}
-	s, err := selenium.NewSeleniumService(*selenium3Path, port, c.ServiceOptions...)
+	s, err := selenium.NewSeleniumService(*selenium3Path, port, c.ServiceOptions)
 	if err != nil {
 		t.Fatalf("Error starting the WebDriver server with binary %q: %v", *selenium3Path, err)
 	}
@@ -274,14 +274,14 @@ func runFirefoxTests(t *testing.T, webDriverPath string, c seleniumtest.Config) 
 	var s *selenium.Service
 	if c.SeleniumVersion.Major == 0 {
 		c.Addr = fmt.Sprintf("http://127.0.0.1:%d", port)
-		s, err = selenium.NewGeckoDriverService(webDriverPath, port, c.ServiceOptions...)
+		s, err = selenium.NewGeckoDriverService(webDriverPath, port, c.ServiceOptions)
 	} else {
 		c.Addr = fmt.Sprintf("http://127.0.0.1:%d/wd/hub", port)
 		if _, err := os.Stat(*selenium3Path); err != nil {
 			t.Skipf("Skipping Firefox tests using Selenium 3 because Selenium WebDriver JAR not found at path %q", *selenium3Path)
 		}
 
-		s, err = selenium.NewSeleniumService(webDriverPath, port, c.ServiceOptions...)
+		s, err = selenium.NewSeleniumService(webDriverPath, port, c.ServiceOptions)
 	}
 	if err != nil {
 		t.Fatalf("Error starting the WebDriver server with binary %q: %v", webDriverPath, err)

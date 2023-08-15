@@ -160,13 +160,13 @@ type Service struct {
 }
 
 // FrameBuffer returns the FrameBuffer if one was started by the service and nil otherwise.
-func (s Service) FrameBuffer() *FrameBuffer {
+func (s *Service) FrameBuffer() *FrameBuffer {
 	return s.xvfb
 }
 
 // NewSeleniumService starts a Selenium instance in the background.
-func NewSeleniumService(jarPath string, port int, opts ...ServiceOption) (*Service, error) {
-	s, err := newService(exec.Command("java"), "/wd/hub", port, opts...)
+func NewSeleniumService(jarPath string, port int, opts []ServiceOption, args ...string) (*Service, error) {
+	s, err := newService(exec.Command("java", args...), "/wd/hub", port, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -195,8 +195,9 @@ func NewSeleniumService(jarPath string, port int, opts ...ServiceOption) (*Servi
 }
 
 // NewChromeDriverService starts a ChromeDriver instance in the background.
-func NewChromeDriverService(path string, port int, opts ...ServiceOption) (*Service, error) {
-	cmd := exec.Command(path, "--port="+strconv.Itoa(port), "--url-base=wd/hub", "--verbose")
+func NewChromeDriverService(path string, port int, opts []ServiceOption, args ...string) (*Service, error) {
+	a := append(args, "--port="+strconv.Itoa(port), "--url-base=wd/hub", "--verbose")
+	cmd := exec.Command(path, a...)
 	s, err := newService(cmd, "/wd/hub", port, opts...)
 	if err != nil {
 		return nil, err
@@ -209,8 +210,9 @@ func NewChromeDriverService(path string, port int, opts ...ServiceOption) (*Serv
 }
 
 // NewGeckoDriverService starts a GeckoDriver instance in the background.
-func NewGeckoDriverService(path string, port int, opts ...ServiceOption) (*Service, error) {
-	cmd := exec.Command(path, "--port", strconv.Itoa(port))
+func NewGeckoDriverService(path string, port int, opts []ServiceOption, args ...string) (*Service, error) {
+	a := append(args, "--port", strconv.Itoa(port))
+	cmd := exec.Command(path, a...)
 	s, err := newService(cmd, "", port, opts...)
 	if err != nil {
 		return nil, err
@@ -290,6 +292,11 @@ func (s *Service) Stop() error {
 		return s.xvfb.Stop()
 	}
 	return nil
+}
+
+// Get remote addr
+func (s *Service) GetAddr() string {
+	return s.addr
 }
 
 // FrameBuffer controls an X virtual frame buffer running as a background
