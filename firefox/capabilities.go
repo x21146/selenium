@@ -5,7 +5,7 @@ import (
 	"bytes"
 	"encoding/base64"
 
-	"github.com/tebeka/selenium/internal/zip"
+	"github.com/x21146/selenium/internal/zip"
 )
 
 // CapabilitiesKey is the name of the Firefox-specific key in the WebDriver
