@@ -197,23 +197,16 @@ func NewSeleniumService(jarPath string, port int, opts []ServiceOption, args ...
 
 // NewChromeDriverService starts a ChromeDriver instance in the background.
 func NewChromeDriverService(path string, port int, opts []ServiceOption, args ...string) (*Service, error) {
-	a := append(args, "--port="+strconv.Itoa(port), "--url-base=wd/hub", "--verbose")
-	cmd := exec.CommandContext(context.Background(), path, a...)
-	s, err := newService(cmd, "/wd/hub", port, opts...)
-	if err != nil {
-		return nil, err
-	}
-	s.shutdownURLPath = "/shutdown"
-	if err := s.start(port); err != nil {
-		return nil, err
-	}
-	return s, nil
+	return NewChromeDriverServiceContext(context.Background(), path, port, opts, args...)
 }
 
 // NewChromeDriverService starts a ChromeDriver instance in the background.
 func NewChromeDriverServiceContext(ctx context.Context, path string, port int, opts []ServiceOption, args ...string) (*Service, error) {
 	a := append(args, "--port="+strconv.Itoa(port), "--url-base=wd/hub", "--verbose")
 	cmd := exec.CommandContext(ctx, path, a...)
+	// start chromedriver in new process group
+	// let main process to maintain when to close it
+	cmd.SysProcAttr = cmdAttr
 	s, err := newService(cmd, "/wd/hub", port, opts...)
 	if err != nil {
 		return nil, err
