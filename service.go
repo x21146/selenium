@@ -2,6 +2,7 @@ package selenium
 
 import (
 	"bufio"
+	"context"
 	"errors"
 	"fmt"
 	"io"
@@ -197,7 +198,22 @@ func NewSeleniumService(jarPath string, port int, opts []ServiceOption, args ...
 // NewChromeDriverService starts a ChromeDriver instance in the background.
 func NewChromeDriverService(path string, port int, opts []ServiceOption, args ...string) (*Service, error) {
 	a := append(args, "--port="+strconv.Itoa(port), "--url-base=wd/hub", "--verbose")
-	cmd := exec.Command(path, a...)
+	cmd := exec.CommandContext(context.Background(), path, a...)
+	s, err := newService(cmd, "/wd/hub", port, opts...)
+	if err != nil {
+		return nil, err
+	}
+	s.shutdownURLPath = "/shutdown"
+	if err := s.start(port); err != nil {
+		return nil, err
+	}
+	return s, nil
+}
+
+// NewChromeDriverService starts a ChromeDriver instance in the background.
+func NewChromeDriverServiceContext(ctx context.Context, path string, port int, opts []ServiceOption, args ...string) (*Service, error) {
+	a := append(args, "--port="+strconv.Itoa(port), "--url-base=wd/hub", "--verbose")
+	cmd := exec.CommandContext(ctx, path, a...)
 	s, err := newService(cmd, "/wd/hub", port, opts...)
 	if err != nil {
 		return nil, err
